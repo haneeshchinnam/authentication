@@ -1,8 +1,13 @@
 package com.example.auth.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import lombok.Builder;
+import lombok.Data;
 
-public record RefreshTokenRequest(
-        @NotBlank String refreshToken
-) {
+import javax.validation.constraints.NotBlank;
+
+@Data
+@Builder
+public class RefreshTokenRequest {
+        @NotBlank
+        String refreshToken;
 }

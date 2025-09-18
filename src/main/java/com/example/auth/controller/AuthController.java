@@ -5,13 +5,14 @@ import com.example.auth.dto.AuthResponse;
 import com.example.auth.dto.RefreshTokenRequest;
 import com.example.auth.dto.TokenResponse;
 import com.example.auth.service.AuthService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -32,7 +33,7 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<TokenResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
-        String newAccessToken = authService.refreshToken(request.refreshToken());
+        String newAccessToken = authService.refreshToken(request.getRefreshToken());
         return ResponseEntity.ok(new TokenResponse(newAccessToken));
     }
 

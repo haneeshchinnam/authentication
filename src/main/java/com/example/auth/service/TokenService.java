@@ -19,23 +19,23 @@ public class TokenService {
     private final JwtProperties jwtProperties;
 
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(jwtProperties.secret().getBytes());
+        return Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes());
     }
 
     public String generateAccessToken(UserDetails userDetails) {
-        return generateToken(userDetails, new HashMap<>(), jwtProperties.accessTokenExpiration());
+        return generateToken(userDetails, new HashMap<>(), jwtProperties.getAccessTokenExpiration());
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
-        return generateToken(userDetails, new HashMap<>(), jwtProperties.refreshTokenExpiration());
+        return generateToken(userDetails, new HashMap<>(), jwtProperties.getRefreshTokenExpiration());
     }
 
     private String generateToken(UserDetails userDetails, Map<String, Object> extraClaims, long expiration) {
-        return Jwts.builder().claims(extraClaims).subject(userDetails.getUsername()).issuedAt(new Date(System.currentTimeMillis())).expiration(new Date(System.currentTimeMillis() + expiration)).signWith(getSigningKey()).compact();
+        return Jwts.builder().addClaims(extraClaims).setSubject(userDetails.getUsername()).setIssuedAt(new Date(System.currentTimeMillis())).setExpiration(new Date(System.currentTimeMillis() + expiration)).signWith(getSigningKey()).compact();
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload();
+        return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody();
     }
 
     private Date extractExpiration(String token) {

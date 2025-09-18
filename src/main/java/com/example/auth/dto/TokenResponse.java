@@ -1,6 +1,12 @@
 package com.example.auth.dto;
 
-public record TokenResponse(
-        String accessToken
-) {
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+@AllArgsConstructor
+public class TokenResponse {
+        String accessToken;
 }

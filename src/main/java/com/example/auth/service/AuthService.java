@@ -25,11 +25,11 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     public AuthResponse register(AuthRequest authRequest) {
-        if(userRepository.existsByEmail(authRequest.email()) || userRepository.existsByUsername(authRequest.username())) {
+        if(userRepository.existsByEmail(authRequest.getEmail()) || userRepository.existsByUsername(authRequest.getUsername())) {
             throw new RuntimeException("Username or email already exists");
         }
 
-        User user = new User(authRequest.username(), authRequest.email(), passwordEncoder.encode(authRequest.password()));
+        User user = new User(authRequest.getUsername(), authRequest.getEmail(), passwordEncoder.encode(authRequest.getPassword()));
         userRepository.save(user);
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
@@ -43,8 +43,8 @@ public class AuthService {
     }
 
     public AuthResponse authenticate(AuthRequest request) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.username(), request.password()));
-        UserDetails userDetails = userDetailsService.loadUserByUsername(request.username());
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+        UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
 
         String accessToken = tokenService.generateAccessToken(userDetails);
         String refreshToken = tokenService.generateRefreshToken(userDetails);
