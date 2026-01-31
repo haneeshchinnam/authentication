@@ -5,9 +5,13 @@ import com.example.auth.dto.AuthResponse;
 import com.example.auth.model.User;
 import com.example.auth.repository.RefreshTokenRepository;
 import com.example.auth.repository.UserRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -23,6 +28,7 @@ public class AuthService {
     private final UserDetailsService userDetailsService;
     private final TokenService tokenService;
     private final PasswordEncoder passwordEncoder;
+    private final ObjectMapper objectMapper;
 
     public AuthResponse register(AuthRequest authRequest) {
         if(userRepository.existsByEmail(authRequest.email()) || userRepository.existsByUsername(authRequest.username())) {
@@ -43,15 +49,26 @@ public class AuthService {
     }
 
     public AuthResponse authenticate(AuthRequest request) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.username(), request.password()));
-        UserDetails userDetails = userDetailsService.loadUserByUsername(request.username());
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.username(), request.password()));
 
-        String accessToken = tokenService.generateAccessToken(userDetails);
-        String refreshToken = tokenService.generateRefreshToken(userDetails);
+        log.info("Authentication successful: {}", authentication.isAuthenticated());
+        try {
+            log.info("Authorities: {}", objectMapper.writeValueAsString(authentication.getDetails()));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
-        refreshTokenRepository.save(refreshToken, userDetails);
+        if (authentication.isAuthenticated()) {
+            UserDetails userDetails = userDetailsService.loadUserByUsername(request.username());
 
-        return new AuthResponse(accessToken, refreshToken);
+            String accessToken = tokenService.generateAccessToken(userDetails);
+            String refreshToken = tokenService.generateRefreshToken(userDetails);
+
+            refreshTokenRepository.save(refreshToken, userDetails);
+
+            return new AuthResponse(accessToken, refreshToken);
+        }
+        throw new RuntimeException("Authentication Failed");
     }
 
     public String refreshToken(String refreshToken) {

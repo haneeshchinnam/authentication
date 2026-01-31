@@ -20,7 +20,18 @@ spring:
     baseline-on-migrate: true
     locations: classpath:db/migration
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 30923567816-erg2nbq2osj7p9hrit1co1ogav2jpu58.apps.googleusercontent.com
+            client-secret: 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
+            scope:
+              - email
+              - profile
+
 jwt:
-  secret: ${JWT_SECRET:mySecretKey1234567890123456789012345678901234567890}
-  access-token-expiration: 900000  # 15 minutes
+  secret: secretsecretsecretsecretsecretsecret
+  access-token-expiration: 86400000  # 15 minutes
   refresh-token-expiration: 86400000  # 24 hours

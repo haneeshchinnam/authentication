@@ -13,19 +13,25 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class UserController {
     private final UserRepository userRepository;
 
-    @GetMapping("/profile")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<String> getUserProfile(Authentication authentication) {
-        return ResponseEntity.ok("Welcome " + authentication.getName() + "!");
-    }
+//    @GetMapping("/profile")
+//    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+//    public ResponseEntity<String> getUserProfile(Authentication authentication) {
+//        return ResponseEntity.ok("Welcome " + authentication.getName() + "!");
+//    }
 
     @GetMapping("/")
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userRepository.findAll());
+    }
+
+    @GetMapping("/profile")
+    public String profile(Authentication authentication) {
+
+        return "Hello " + authentication.getName();
     }
 }

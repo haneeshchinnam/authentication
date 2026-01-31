@@ -3,12 +3,14 @@ package com.example.auth.service;
 import com.example.auth.config.JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +19,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class TokenService {
     private final JwtProperties jwtProperties;
+    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(jwtProperties.secret().getBytes());
@@ -31,7 +34,26 @@ public class TokenService {
     }
 
     private String generateToken(UserDetails userDetails, Map<String, Object> extraClaims, long expiration) {
-        return Jwts.builder().claims(extraClaims).subject(userDetails.getUsername()).issuedAt(new Date(System.currentTimeMillis())).expiration(new Date(System.currentTimeMillis() + expiration)).signWith(getSigningKey()).compact();
+        return Jwts.builder().claims(extraClaims).subject(userDetails.getUsername()).issuedAt(new Date(System.currentTimeMillis())).expiration(new Date(System.currentTimeMillis() + expiration)).signWith(key).compact();
+    }
+
+    public String generateToken(String email) {
+
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() +jwtProperties.accessTokenExpiration()))
+                .signWith(key)
+                .compact();
+    }
+
+    public String extractEmail(String token) {
+        return Jwts.parser()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
     }
 
     private Claims extractAllClaims(String token) {
