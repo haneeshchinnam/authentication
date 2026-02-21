@@ -54,24 +54,27 @@ public class AuthService {
         return new AuthResponse(accessToken, refreshToken);
     }
 
-    public String refreshToken(String refreshToken) {
+    public AuthResponse refreshToken(String refreshToken) {
         if (!tokenService.isValid(refreshToken)) {
             throw new RuntimeException("Invalid refresh token");
         }
 
-        UserDetails storedUserDetails = refreshTokenRepository.findUserDetailsByToken(refreshToken);
+        String username = tokenService.extractUsername(refreshToken);
+
+        UserDetails storedUserDetails = userDetailsService.loadUserByUsername(username);
 
         if (storedUserDetails == null) {
             throw new RuntimeException("Refresh Token not found");
         }
 
-        String username = tokenService.extractUsername(refreshToken);
-
-        UserDetails currentUserDetails = userDetailsService.loadUserByUsername(username);
-
-        if (!storedUserDetails.getUsername().equals(currentUserDetails.getUsername())) {
+        if (!storedUserDetails.getUsername().equals(storedUserDetails.getUsername())) {
             throw new RuntimeException("Invalid refresh token");
         }
-        return tokenService.generateRefreshToken(currentUserDetails);
+
+//        refreshTokenRepository.deleteToken(refreshToken);
+
+        String accessToken = tokenService.generateAccessToken(storedUserDetails);
+//        refreshTokenRepository.save(newRefreshToken, storedUserDetails);
+        return new AuthResponse(accessToken, refreshToken);
     }
 }
