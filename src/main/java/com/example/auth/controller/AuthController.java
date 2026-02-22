@@ -2,16 +2,11 @@ package com.example.auth.controller;
 
 import com.example.auth.dto.AuthRequest;
 import com.example.auth.dto.AuthResponse;
-import com.example.auth.dto.RefreshTokenRequest;
-import com.example.auth.dto.TokenResponse;
 import com.example.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -31,9 +26,14 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
-        AuthResponse newRes = authService.refreshToken(request.refreshToken());
-        return ResponseEntity.ok(newRes);
+    public ResponseEntity<AuthResponse> refreshToken(@RequestHeader("refresh_token") String refreshToken) {
+        if (refreshToken != null && refreshToken.startsWith("Bearer ")) {
+            refreshToken = refreshToken.substring(7);
+            AuthResponse newRes = authService.refreshToken(refreshToken);
+            return ResponseEntity.ok(newRes);
+        } else {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 
 }

@@ -3,7 +3,6 @@ package com.example.auth.service;
 import com.example.auth.dto.AuthRequest;
 import com.example.auth.dto.AuthResponse;
 import com.example.auth.model.User;
-import com.example.auth.repository.RefreshTokenRepository;
 import com.example.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,12 +12,13 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
     private final TokenService tokenService;
@@ -30,14 +30,16 @@ public class AuthService {
         }
 
         User user = new User(authRequest.username(), authRequest.email(), passwordEncoder.encode(authRequest.password()));
-        userRepository.save(user);
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
 
         String accessToken = tokenService.generateAccessToken(userDetails);
         String refreshToken = tokenService.generateRefreshToken(userDetails);
 
-        refreshTokenRepository.save(refreshToken, userDetails);
+        user.setAccessToken(accessToken);
+        user.setRefreshToken(refreshToken);
+
+        userRepository.save(user);
 
         return new AuthResponse(accessToken, refreshToken);
     }
@@ -49,12 +51,21 @@ public class AuthService {
         String accessToken = tokenService.generateAccessToken(userDetails);
         String refreshToken = tokenService.generateRefreshToken(userDetails);
 
-        refreshTokenRepository.save(refreshToken, userDetails);
+        Optional<User> userOpt = userRepository.findByUsername(request.username());
+
+        if (userOpt.isPresent()) {
+            userOpt.get().setAccessToken(accessToken);
+            userOpt.get().setRefreshToken(refreshToken);
+            userRepository.save(userOpt.get());
+        } else {
+            throw new RuntimeException("User not found");
+        }
 
         return new AuthResponse(accessToken, refreshToken);
     }
 
     public AuthResponse refreshToken(String refreshToken) {
+        System.out.println("valid token "+ tokenService.isValid(refreshToken));
         if (!tokenService.isValid(refreshToken)) {
             throw new RuntimeException("Invalid refresh token");
         }
@@ -62,19 +73,27 @@ public class AuthService {
         String username = tokenService.extractUsername(refreshToken);
 
         UserDetails storedUserDetails = userDetailsService.loadUserByUsername(username);
+        Optional<User> userOpt = userRepository.findByUsername(username);
 
         if (storedUserDetails == null) {
             throw new RuntimeException("Refresh Token not found");
         }
 
-        if (!storedUserDetails.getUsername().equals(storedUserDetails.getUsername())) {
+        if (!storedUserDetails.getUsername().equals(storedUserDetails.getUsername()) ||
+                (userOpt.isPresent() && !refreshToken.equals(userOpt.get().getRefreshToken()))) {
             throw new RuntimeException("Invalid refresh token");
         }
 
 //        refreshTokenRepository.deleteToken(refreshToken);
 
         String accessToken = tokenService.generateAccessToken(storedUserDetails);
-//        refreshTokenRepository.save(newRefreshToken, storedUserDetails);
+
+        if (userOpt.isPresent()) {
+            userOpt.get().setAccessToken(accessToken);
+            userRepository.save(userOpt.get());
+        } else {
+            throw new RuntimeException("User not found");
+        }
         return new AuthResponse(accessToken, refreshToken);
     }
 }

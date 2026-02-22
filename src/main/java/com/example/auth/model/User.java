@@ -43,6 +43,13 @@ public class User {
     @Column(name = "role")
     private Set<Role> roles = new HashSet<>();
 
+    @ManyToMany(mappedBy = "users")
+    private Set<Group> groups = new HashSet<>();
+
+    private String accessToken;
+
+    private String refreshToken;
+
     public User(String username, String email, String password) {
         this.username = username;
         this.email = email;
