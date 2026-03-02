@@ -2,6 +2,7 @@ package com.example.auth.service;
 
 import com.example.auth.dto.AuthRequest;
 import com.example.auth.dto.AuthResponse;
+import com.example.auth.exception.UserNotFoundException;
 import com.example.auth.model.User;
 import com.example.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -58,7 +59,7 @@ public class AuthService {
             userOpt.get().setRefreshToken(refreshToken);
             userRepository.save(userOpt.get());
         } else {
-            throw new RuntimeException("User not found");
+            throw new UserNotFoundException("User not found");
         }
 
         return new AuthResponse(accessToken, refreshToken);
@@ -92,7 +93,7 @@ public class AuthService {
             userOpt.get().setAccessToken(accessToken);
             userRepository.save(userOpt.get());
         } else {
-            throw new RuntimeException("User not found");
+            throw new UserNotFoundException("User not found");
         }
         return new AuthResponse(accessToken, refreshToken);
     }
