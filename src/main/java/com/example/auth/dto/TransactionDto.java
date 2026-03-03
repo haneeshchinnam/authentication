@@ -20,6 +20,7 @@ public class TransactionDto {
     @Builder.Default
     private SplitType splitType = SplitType.EQUAL; // Default to EQUAL if not provided
 
+    @Builder.Default
     private List<Double> splitValues = new ArrayList<>(); // Optional, required only for UNEQUAL and PERCENTAGE
 
     @NotNull
