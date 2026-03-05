@@ -14,7 +14,7 @@ spring:
 
   flyway:
     enabled: true
-    url: jdbc:postgresql://localhost:5432/auth
+    url: jdbc:postgresql://localhost:5432/print
     user: postgres
     password: 138717
     baseline-on-migrate: true
@@ -24,3 +24,10 @@ jwt:
   secret: ${JWT_SECRET:mySecretKey1234567890123456789012345678901234567890}
   access-token-expiration: 900000  # 15 minutes
   refresh-token-expiration: 86400000  # 24 hours
+
+S3:
+  access-key: d7898783449f55e7a665c9856f4d9e18
+  secret-key: cf687642c99f1520070a9acae481dceb91ade12523e8c8404a198f3eee794279
+  bucket-name: print
+  region: ap-southeast-1
+  endpoint: https://lgooqkujhgxabqtwwlep.storage.supabase.co/storage/v1/s3
