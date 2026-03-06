@@ -43,6 +43,7 @@ public class User {
     @Column(name = "role")
     private Set<Role> roles = new HashSet<>();
 
+
     private String accessToken;
 
     private String refreshToken;
