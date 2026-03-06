@@ -32,6 +32,8 @@ public class AuthService {
 
         User user = new User(authRequest.username(), authRequest.email(), passwordEncoder.encode(authRequest.password()));
 
+        userRepository.save(user);
+
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
 
         String accessToken = tokenService.generateAccessToken(userDetails);
@@ -40,7 +42,7 @@ public class AuthService {
         user.setAccessToken(accessToken);
         user.setRefreshToken(refreshToken);
 
-        userRepository.save(user);
+        userRepository.saveAndFlush(user);
 
         return new AuthResponse(accessToken, refreshToken);
     }

@@ -33,8 +33,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String jwt = parseJwt(request);
 
-        System.out.println("is valid "+ tokenService.isValid(jwt));
-
         if (jwt != null && tokenService.isValid(jwt)) {
             String username = tokenService.extractUsername(jwt);
             Optional<User> user = userRepository.findByUsername(username);
