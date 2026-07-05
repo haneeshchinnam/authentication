@@ -31,3 +31,6 @@ S3:
   bucket-name: print
   region: ap-southeast-1
   endpoint: https://lgooqkujhgxabqtwwlep.storage.supabase.co/storage/v1/s3
+
+server:
+  port: 8081
