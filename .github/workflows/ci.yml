@@ -27,6 +27,9 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew clean build -x test
 
+    - name: Set up QEMU for Multi-Arch builds
+      uses: docker/setup-qemu-action@v3
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
@@ -36,10 +39,11 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Build and Push Docker Image
+    - name: Build and Push Docker Image (AMD64 + ARM64)
       uses: docker/build-push-action@v5
       with:
         context: .
         file: ./Dockerfile
+        platforms: linux/amd64,linux/arm64
         push: true
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/auth-service:latest
