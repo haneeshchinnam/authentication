@@ -1,5 +1,5 @@
 # Stage 1: Build application
-FROM eclipse-temurin:17-jdk-alpine AS builder
+FROM eclipse-temurin:17-jdk AS builder
 
 WORKDIR /app
 
@@ -17,12 +17,12 @@ COPY src src
 RUN ./gradlew bootJar -x test --no-daemon
 
 # Stage 2: Runtime application environment
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre
 
 WORKDIR /app
 
 # Create non-root user for security
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
 USER appuser
 
 # Copy built jar from builder stage
