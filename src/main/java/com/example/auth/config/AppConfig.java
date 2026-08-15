@@ -1,5 +1,7 @@
 package com.example.auth.config;
 
+import com.example.auth.filter.RateLimitFilter;
+import com.example.auth.filter.RequestLoggingFilter;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,5 +15,15 @@ public class AppConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public RateLimitFilter rateLimitFilter() {
+        return new RateLimitFilter();
+    }
+
+    @Bean
+    RequestLoggingFilter requestLoggingFilter() {
+        return new RequestLoggingFilter();
     }
 }

@@ -1,4 +1,9 @@
 package com.example.auth.dto;
 
-public enum RateLimitBucket {
+import java.util.concurrent.atomic.AtomicInteger;
+
+public record RateLimitBucket(AtomicInteger count, long windowEnd) {
+    public int getCount() {
+        return count.get();
+    }
 }
